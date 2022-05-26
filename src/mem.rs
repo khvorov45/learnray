@@ -1,5 +1,3 @@
-use crate::assert;
-
 pub const BYTE: usize = 1;
 pub const KILOBYTE: usize = 1024 * BYTE;
 pub const MEGABYTE: usize = 1024 * KILOBYTE;
@@ -11,7 +9,7 @@ fn is_power_of_2(val: usize) -> bool {
 }
 
 fn align_ptr(ptr: *const u8, align: usize, size: usize) -> (*const u8, usize) {
-    assert(is_power_of_2(align));
+    assert!(is_power_of_2(align));
     let off_by = ptr as usize & (align - 1);
     let mut move_by = 0;
     if off_by > 0 {
@@ -51,7 +49,7 @@ impl Default for VirtualArena {
 
 impl VirtualArena {
     pub fn init(self: &mut VirtualArena, reserve: usize, commit: usize) {
-        assert(commit <= reserve);
+        assert!(commit <= reserve);
         self.reserved = reserve;
         self.used = 0;
         (self.base, self.reserved) = crate::platform_mem::reserve(reserve);

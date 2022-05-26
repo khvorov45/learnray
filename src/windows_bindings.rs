@@ -10,6 +10,7 @@ extern "system" {
         flallocationtype: VIRTUAL_ALLOCATION_TYPE,
         flprotect: PAGE_PROTECTION_FLAGS,
     ) -> *mut ::core::ffi::c_void;
+    pub fn OutputDebugStringA(lpoutputstring: PCSTR);
 }
 
 #[link(name = "User32")]

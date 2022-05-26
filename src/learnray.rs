@@ -1,5 +1,4 @@
 use crate::mem;
-use crate::mem::Allocator;
 
 pub fn main() {
     let mut virtual_arena = mem::VirtualArena::default();
