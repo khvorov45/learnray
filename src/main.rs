@@ -68,7 +68,7 @@ fn handle_panic(info: &core::panic::PanicInfo) -> ! {
             windows_bindings::OutputDebugStringA(&output.buf[0]);
         }
         windows_bindings::DebugBreak();
-        windows_bindings::ExitProcess(0);
+        windows_bindings::ExitProcess(1);
     }
     loop {}
 }
