@@ -47,8 +47,8 @@ impl Write for DebugOutput {
     fn write_str(&mut self, msg: &str) -> Result<(), core::fmt::Error> {
         let mut result = Ok(());
         for byte in msg.bytes() {
+            // NOTE(khvorov) Null terminator
             if self.used < self.buf.len() - 1 {
-                // NOTE(khvorov) Null terminator
                 self.buf[self.used] = byte;
                 self.used += 1;
             } else {
