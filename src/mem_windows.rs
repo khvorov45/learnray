@@ -1,7 +1,7 @@
 use crate::windows_bindings as win;
 
 pub fn reserve(size: usize) -> (*const u8, usize) {
-    let ptr  = unsafe {
+    let ptr = unsafe {
         win::VirtualAlloc(
             core::ptr::null(),
             size,
@@ -9,7 +9,7 @@ pub fn reserve(size: usize) -> (*const u8, usize) {
             win::PAGE_READWRITE,
         ) as *const u8
     };
-    (ptr, size)    
+    (ptr, size)
 }
 
 pub fn commit(ptr: *const u8, size: usize) -> usize {

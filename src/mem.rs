@@ -61,8 +61,8 @@ impl VirtualArena {
 
 impl Allocator for VirtualArena {
     fn alloc(self: &mut Self, size: usize, align: usize) -> Result<*const u8, Error> {
-
-        let (base_aligned, size_aligned) = align_ptr((self.base as usize + self.used) as *const u8, align, size);
+        let (base_aligned, size_aligned) =
+            align_ptr((self.base as usize + self.used) as *const u8, align, size);
 
         let committed_and_free = self.committed - self.used;
         let reserved_and_free = self.reserved - self.used;
@@ -81,11 +81,11 @@ impl Allocator for VirtualArena {
 
     fn make<T>(self: &mut Self, len: usize) -> Result<&mut [T], Error> {
         match self.alloc(core::mem::size_of::<T>() * len, core::mem::size_of::<T>()) {
-        	Ok(ptr) => {
-        		let slice = core::ptr::slice_from_raw_parts_mut(ptr as *mut T, len);
-        		Ok(unsafe { &mut *slice })
-        	}
-        	Err(err) => Err(err)
+            Ok(ptr) => {
+                let slice = core::ptr::slice_from_raw_parts_mut(ptr as *mut T, len);
+                Ok(unsafe { &mut *slice })
+            }
+            Err(err) => Err(err),
         }
     }
 }
