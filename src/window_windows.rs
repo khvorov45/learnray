@@ -1,9 +1,12 @@
+use crate::math::V2i;
 use crate::window::Window;
 use crate::windows_bindings as win;
 
 #[derive(Default)]
 pub struct PlatformWindow {
     hwnd: win::HWND,
+    hdc: win::HDC,
+    bmi: win::BITMAPINFO,
 }
 
 pub fn init(window: &mut Window) {
@@ -22,19 +25,21 @@ pub fn init(window: &mut Window) {
         hIconSm: 0,
     };
 
-    unsafe {
+    let dim = V2i { x: 1000, y: 1000 };
+
+    let (hwnd, hdc) = unsafe {
         win::GetModuleHandleExW(0, core::ptr::null(), &mut window_class.hInstance);
         win::RegisterClassExW(&window_class);
 
-        window.platform.hwnd = win::CreateWindowExW(
+        let hwnd = win::CreateWindowExW(
             win::WS_EX_APPWINDOW,
             window_class.lpszClassName,
             &utf16_null!("learnray")[0],
             win::WS_OVERLAPPEDWINDOW,
             win::CW_USEDEFAULT,
             win::CW_USEDEFAULT,
-            1000,
-            1000,
+            dim.x,
+            dim.y,
             0,
             0,
             window_class.hInstance,
@@ -48,10 +53,27 @@ pub fn init(window: &mut Window) {
         );
 
         // NOTE(khvorov) To avoid a white flash
-        win::ShowWindow(window.platform.hwnd, win::SW_SHOWMINIMIZED);
-        win::ShowWindow(window.platform.hwnd, win::SW_SHOWNORMAL);
+        win::ShowWindow(hwnd, win::SW_SHOWMINIMIZED);
+        win::ShowWindow(hwnd, win::SW_SHOWNORMAL);
 
-        window.is_running = true;
+        let hdc = win::GetDC(hwnd);
+
+        (hwnd, hdc)
+    };
+
+    // NOTE(khvorov) Set width and height before displaying pixels
+    let mut bmi = win::BITMAPINFO::default();
+    bmi.bmiHeader.biSize = core::mem::size_of::<win::BITMAPINFOHEADER>() as u32;
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32;
+    bmi.bmiHeader.biCompression = win::BI_RGB as u32;
+
+    let platform = PlatformWindow { hwnd, hdc, bmi };
+
+    *window = Window {
+        is_running: true,
+        dim: dim,
+        platform: platform,
     }
 }
 
@@ -88,4 +110,26 @@ pub fn poll_for_input(_window: &mut Window) {
             },
         }
     }
+}
+
+pub fn display_pixels(window: &mut Window, pixels: &[u32], px_width: i32, px_height: i32) {
+    window.platform.bmi.bmiHeader.biWidth = px_width;
+    window.platform.bmi.bmiHeader.biHeight = -px_height; // NOTE(khvorov) Negative = top-down
+    unsafe {
+        win::StretchDIBits(
+            window.platform.hdc,
+            0,
+            0,
+            window.dim.x,
+            window.dim.y,
+            0,
+            0,
+            px_width,
+            px_height,
+            pixels.as_ptr() as *const core::ffi::c_void,
+            &window.platform.bmi,
+            win::DIB_RGB_COLORS,
+            win::SRCCOPY,
+        );
+    };
 }

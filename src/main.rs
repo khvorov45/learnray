@@ -5,7 +5,9 @@
 use core::fmt::Write;
 
 mod learnray;
+mod math;
 mod mem;
+mod renderer;
 mod window;
 
 #[cfg(target_os = "windows")]

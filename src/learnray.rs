@@ -1,3 +1,4 @@
+use crate::math::V4;
 use crate::mem;
 
 pub fn main() {
@@ -7,7 +8,21 @@ pub fn main() {
     let mut window = crate::window::Window::default();
     window.init();
 
+    let mut renderer = crate::renderer::Renderer::default();
+    renderer.init(7680, 4320, &mut virtual_arena);
+
+    let clear_color = V4 {
+        r: 0.1,
+        g: 0.1,
+        b: 0.1,
+        a: 1.0,
+    };
+
     while window.is_running {
         window.poll_for_input();
+
+        renderer.clear_buffers(window.dim.x, window.dim.y, clear_color);
+
+        window.display_pixels(renderer.pixels, renderer.dim.x, renderer.dim.y);
     }
 }

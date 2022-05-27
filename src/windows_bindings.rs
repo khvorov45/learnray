@@ -50,6 +50,22 @@ extern "system" {
     ) -> BOOL;
     pub fn TranslateMessage(lpmsg: *const MSG) -> BOOL;
     pub fn DispatchMessageW(lpmsg: *const MSG) -> LRESULT;
+    pub fn GetDC(hwnd: HWND) -> HDC;
+    pub fn StretchDIBits(
+        hdc: HDC,
+        xdest: i32,
+        ydest: i32,
+        destwidth: i32,
+        destheight: i32,
+        xsrc: i32,
+        ysrc: i32,
+        srcwidth: i32,
+        srcheight: i32,
+        lpbits: *const ::core::ffi::c_void,
+        lpbmi: *const BITMAPINFO,
+        iusage: DIB_USAGE,
+        rop: ROP_CODE,
+    ) -> i32;
 }
 
 #[link(name = "Gdi32")]
@@ -271,6 +287,38 @@ pub struct MSG {
 pub struct POINT {
     pub x: i32,
     pub y: i32,
+}
+
+#[derive(Default)]
+#[repr(C)]
+pub struct BITMAPINFO {
+    pub bmiHeader: BITMAPINFOHEADER,
+    pub bmiColors: [RGBQUAD; 1],
+}
+
+#[derive(Default)]
+#[repr(C)]
+pub struct BITMAPINFOHEADER {
+    pub biSize: u32,
+    pub biWidth: i32,
+    pub biHeight: i32,
+    pub biPlanes: u16,
+    pub biBitCount: u16,
+    pub biCompression: u32,
+    pub biSizeImage: u32,
+    pub biXPelsPerMeter: i32,
+    pub biYPelsPerMeter: i32,
+    pub biClrUsed: u32,
+    pub biClrImportant: u32,
+}
+
+#[derive(Default)]
+#[repr(C)]
+pub struct RGBQUAD {
+    pub rgbBlue: u8,
+    pub rgbGreen: u8,
+    pub rgbRed: u8,
+    pub rgbReserved: u8,
 }
 
 pub type WINDOW_LONG_PTR_INDEX = i32;
@@ -607,3 +655,75 @@ pub type PAGE_TYPE = u32;
 pub const MEM_PRIVATE: PAGE_TYPE = 131072u32;
 pub const MEM_MAPPED: PAGE_TYPE = 262144u32;
 pub const MEM_IMAGE: PAGE_TYPE = 16777216u32;
+
+pub const BI_BITFIELDS: i32 = 3i32;
+pub const BI_JPEG: i32 = 4i32;
+pub const BI_PNG: i32 = 5i32;
+pub const BI_RGB: i32 = 0i32;
+pub const BI_RLE4: i32 = 2i32;
+pub const BI_RLE8: i32 = 1i32;
+pub const BKMODE_LAST: u32 = 2u32;
+
+pub type DIB_USAGE = u32;
+pub const DIB_RGB_COLORS: DIB_USAGE = 0u32;
+pub const DIB_PAL_COLORS: DIB_USAGE = 1u32;
+
+pub type ROP_CODE = u32;
+pub const SRCCOPY: ROP_CODE = 13369376u32;
+pub const SRCPAINT: ROP_CODE = 15597702u32;
+pub const SRCAND: ROP_CODE = 8913094u32;
+pub const SRCINVERT: ROP_CODE = 6684742u32;
+pub const SRCERASE: ROP_CODE = 4457256u32;
+pub const NOTSRCCOPY: ROP_CODE = 3342344u32;
+pub const NOTSRCERASE: ROP_CODE = 1114278u32;
+pub const MERGECOPY: ROP_CODE = 12583114u32;
+pub const MERGEPAINT: ROP_CODE = 12255782u32;
+pub const PATCOPY: ROP_CODE = 15728673u32;
+pub const PATPAINT: ROP_CODE = 16452105u32;
+pub const PATINVERT: ROP_CODE = 5898313u32;
+pub const DSTINVERT: ROP_CODE = 5570569u32;
+pub const BLACKNESS: ROP_CODE = 66u32;
+pub const WHITENESS: ROP_CODE = 16711778u32;
+pub const NOMIRRORBITMAP: ROP_CODE = 2147483648u32;
+pub const CAPTUREBLT: ROP_CODE = 1073741824u32;
+pub const RUSSIAN_CHARSET: u32 = 204u32;
+pub const SAVE_CTM: u32 = 4101u32;
+pub const SB_CONST_ALPHA: u32 = 1u32;
+pub const SB_GRAD_RECT: u32 = 16u32;
+pub const SB_GRAD_TRI: u32 = 32u32;
+pub const SB_NONE: u32 = 0u32;
+pub const SB_PIXEL_ALPHA: u32 = 2u32;
+pub const SB_PREMULT_ALPHA: u32 = 4u32;
+pub const SC_SCREENSAVE: u32 = 61760u32;
+pub const SDC_ALLOW_CHANGES: u32 = 1024u32;
+pub const SDC_ALLOW_PATH_ORDER_CHANGES: u32 = 8192u32;
+pub const SDC_APPLY: u32 = 128u32;
+pub const SDC_FORCE_MODE_ENUMERATION: u32 = 4096u32;
+pub const SDC_NO_OPTIMIZATION: u32 = 256u32;
+pub const SDC_PATH_PERSIST_IF_REQUIRED: u32 = 2048u32;
+pub const SDC_SAVE_TO_DATABASE: u32 = 512u32;
+pub const SDC_TOPOLOGY_CLONE: u32 = 2u32;
+pub const SDC_TOPOLOGY_EXTEND: u32 = 4u32;
+pub const SDC_TOPOLOGY_EXTERNAL: u32 = 8u32;
+pub const SDC_TOPOLOGY_INTERNAL: u32 = 1u32;
+pub const SDC_TOPOLOGY_SUPPLIED: u32 = 16u32;
+pub const SDC_USE_SUPPLIED_DISPLAY_CONFIG: u32 = 32u32;
+pub const SDC_VALIDATE: u32 = 64u32;
+pub const SDC_VIRTUAL_MODE_AWARE: u32 = 32768u32;
+pub const SDC_VIRTUAL_REFRESH_RATE_AWARE: u32 = 131072u32;
+pub const SELECTDIB: u32 = 41u32;
+pub const SELECTPAPERSOURCE: u32 = 18u32;
+pub const SETABORTPROC: u32 = 9u32;
+pub const SETALLJUSTVALUES: u32 = 771u32;
+pub const SETCHARSET: u32 = 772u32;
+pub const SETCOLORTABLE: u32 = 4u32;
+pub const SETCOPYCOUNT: u32 = 17u32;
+pub const SETDIBSCALING: u32 = 32u32;
+pub const SETICMPROFILE_EMBEDED: u32 = 1u32;
+pub const SETKERNTRACK: u32 = 770u32;
+pub const SETLINECAP: u32 = 21u32;
+pub const SETLINEJOIN: u32 = 22u32;
+pub const SETMITERLIMIT: u32 = 23u32;
+pub const SET_ARC_DIRECTION: u32 = 4102u32;
+pub const SET_BACKGROUND_COLOR: u32 = 4103u32;
+pub const SET_BOUNDS: u32 = 4109u32;

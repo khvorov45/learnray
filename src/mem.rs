@@ -78,7 +78,7 @@ impl Allocator for VirtualArena {
     }
 
     fn make<T>(self: &mut Self, len: usize) -> Result<&mut [T], Error> {
-        match self.alloc(core::mem::size_of::<T>() * len, core::mem::size_of::<T>()) {
+        match self.alloc(core::mem::size_of::<T>() * len, core::mem::align_of::<T>()) {
             Ok(ptr) => {
                 let slice = core::ptr::slice_from_raw_parts_mut(ptr as *mut T, len);
                 Ok(unsafe { &mut *slice })
