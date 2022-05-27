@@ -1,4 +1,4 @@
-use crate::math::V4;
+use crate::math::Color;
 use crate::mem;
 
 pub fn main() {
@@ -11,7 +11,7 @@ pub fn main() {
     let mut renderer = crate::renderer::Renderer::default();
     renderer.init(7680, 4320, &mut virtual_arena);
 
-    let clear_color = V4 {
+    let clear_color = Color {
         r: 0.1,
         g: 0.1,
         b: 0.1,
