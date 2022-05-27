@@ -1,8 +1,7 @@
 use core::cmp::min;
 
-use crate::math::color_to_u32argb;
-use crate::math::V2i;
 use crate::math::Color;
+use crate::math::V2i;
 use crate::mem::Allocator;
 
 #[derive(Default)]
@@ -27,7 +26,7 @@ impl<'a> Renderer<'a> {
     }
 
     pub fn clear_buffers(&mut self, width: i32, height: i32, color: Color) {
-        let color32 = color_to_u32argb(color);
+        let color32 = color.to_u32argb();
 
         self.dim.x = min(width, self.max_dim.x);
         self.dim.y = min(height, self.max_dim.y);

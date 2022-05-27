@@ -9,7 +9,7 @@ pub struct PlatformWindow {
     bmi: win::BITMAPINFO,
 }
 
-pub fn init(window: &mut Window) {
+pub fn init(window: &mut Window, width: i32, height: i32) {
     let mut window_class = win::WNDCLASSEXW {
         cbSize: core::mem::size_of::<win::WNDCLASSEXW>() as u32,
         style: win::CS_VREDRAW | win::CS_HREDRAW,
@@ -25,7 +25,10 @@ pub fn init(window: &mut Window) {
         hIconSm: 0,
     };
 
-    let dim = V2i { x: 1000, y: 1000 };
+    let dim = V2i {
+        x: width,
+        y: height,
+    };
 
     let (hwnd, hdc) = unsafe {
         win::GetModuleHandleExW(0, core::ptr::null(), &mut window_class.hInstance);

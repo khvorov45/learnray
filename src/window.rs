@@ -8,8 +8,8 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn init(&mut self) {
-        crate::platform_window::init(self);
+    pub fn init(&mut self, width: i32, height: i32) {
+        crate::platform_window::init(self, width, height);
     }
     pub fn poll_for_input(&mut self) {
         crate::platform_window::poll_for_input(self);
