@@ -2,6 +2,7 @@ use core::cmp::min;
 
 use crate::math::Color;
 use crate::math::V2i;
+use crate::math::Rect2i;
 use crate::mem::Allocator;
 
 #[derive(Default)]
@@ -34,6 +35,20 @@ impl<'a> Renderer<'a> {
         let last_px_index = (self.dim.x * self.dim.y - 1) as usize;
         for px_index in 0..=last_px_index {
             self.pixels[px_index] = color32;
+        }
+    }
+
+    pub fn draw_rect(&mut self, rect: Rect2i, color: Color) {
+        let color32 = color.to_u32argb();
+
+        let rect_clipped = rect.clip_to_rect(Rect2i::new(V2i::new(0, 0), self.dim));
+        let bottomright = rect_clipped.bottomright();
+
+        for row in rect_clipped.topleft.y..bottomright.y {
+            for col in rect_clipped.topleft.x..bottomright.x {
+                let px_index = (row * self.dim.x + col) as usize;
+                self.pixels[px_index] = color32;
+            }
         }
     }
 }

@@ -1,7 +1,30 @@
+use core::cmp::min;
+use core::cmp::max;
+
 #[derive(Default, Clone, Copy)]
 pub struct V2i {
     pub x: i32,
     pub y: i32,
+}
+
+impl core::ops::Add<V2i> for V2i {
+    type Output = V2i;
+    fn add(self, other: V2i) -> V2i {
+        V2i::new(self.x + other.x, self.y + other.y)
+    }
+}
+
+impl core::ops::Sub<V2i> for V2i {
+    type Output = V2i;
+    fn sub(self, other: V2i) -> V2i {
+        V2i::new(self.x - other.x, self.y - other.y)
+    }
+}
+
+impl V2i {
+    pub fn new(x: i32, y: i32) -> V2i {
+        V2i {x, y}
+    }
 }
 
 #[derive(Default, Clone, Copy)]
@@ -56,6 +79,9 @@ impl core::ops::Mul<V3> for f32 {
 }
 
 impl V3 {
+    pub fn new(x: f32, y: f32, z: f32) -> V3 {
+        V3 { x, y, z }
+    }
     pub fn length_sq(&self) -> f32 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
@@ -65,6 +91,10 @@ impl V3 {
     pub fn normalize(&self) -> V3 {
         *self * (1.0 / self.length())
     }
+}
+
+pub fn dot(v1: V3, v2: V3) -> f32 {
+    v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
 }
 
 #[derive(Default, Clone, Copy)]
@@ -112,6 +142,9 @@ impl core::ops::Mul<Color> for f32 {
 }
 
 impl Color {
+    pub fn new(r: f32, g: f32, b: f32, a: f32) -> Color {
+        Color { r, g, b, a }
+    }
     pub fn to_u32argb(&self) -> u32 {
         ((self.a * 255.0) as u32) << 24
             | ((self.r * 255.0) as u32) << 16
@@ -119,6 +152,35 @@ impl Color {
             | ((self.b * 255.0) as u32)
     }
 }
+
+
+#[derive(Default, Clone, Copy)]
+pub struct Rect2i {
+    pub topleft: V2i,
+    pub dim: V2i,
+}
+
+impl Rect2i {
+    pub fn new(topleft: V2i, dim: V2i) -> Rect2i {
+        Rect2i{topleft, dim}
+    }
+    pub fn bottomright(&self) -> V2i {
+        self.topleft + self.dim
+    }
+    pub fn clip_to_rect(&self, rect: Rect2i) -> Rect2i {
+        let topleft = V2i {
+            x: max(self.topleft.x, rect.topleft.x),
+            y: max(self.topleft.y, rect.topleft.y),
+        };
+        let bottomright = V2i {
+            x: min(self.bottomright().x, rect.bottomright().x),
+            y: min(self.bottomright().y, rect.bottomright().y),
+        };
+        let dim = bottomright - topleft;
+        Rect2i::new(topleft, dim)
+    }
+}
+
 
 #[derive(Default, Clone, Copy)]
 pub struct Ray {
