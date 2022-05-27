@@ -4,8 +4,7 @@ pub const MEGABYTE: usize = 1024 * KILOBYTE;
 pub const GIGABYTE: usize = 1024 * MEGABYTE;
 
 fn is_power_of_2(val: usize) -> bool {
-    let result = (val & (val - 1)) == 0;
-    return result;
+    (val & (val - 1)) == 0
 }
 
 fn align_ptr(ptr: *const u8, align: usize, size: usize) -> (*const u8, usize) {
