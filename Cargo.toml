@@ -8,3 +8,7 @@ panic = "abort"
 
 [profile.release]
 panic = "abort"
+
+[[bin]]
+name = "tests"
+path = "src/tests.rs"
