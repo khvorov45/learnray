@@ -14,11 +14,13 @@ pub struct Renderer {
 impl Default for Renderer {
     fn default() -> Renderer {
         Renderer {
-        pixels: unsafe { core::slice::from_raw_parts_mut(core::ptr::null_mut(), 0) as *mut [u32] },
-        dim: V2i::default(),
-        max_dim: V2i::default(),
+            pixels: unsafe {
+                core::slice::from_raw_parts_mut(core::ptr::null_mut(), 0) as *mut [u32]
+            },
+            dim: V2i::default(),
+            max_dim: V2i::default(),
+        }
     }
-}
 }
 
 impl Renderer {

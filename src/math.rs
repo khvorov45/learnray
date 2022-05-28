@@ -167,7 +167,12 @@ impl Color {
         Color { r, g, b, a }
     }
     pub fn from_v3(v3: V3) -> Color {
-        Color {r: v3.x, g: v3.y, b: v3.z, a: 1.0}
+        Color {
+            r: v3.x,
+            g: v3.y,
+            b: v3.z,
+            a: 1.0,
+        }
     }
     pub fn to_u32argb(&self) -> u32 {
         ((self.a * 255.0) as u32) << 24
@@ -228,8 +233,17 @@ pub struct HitRecord {
 impl HitRecord {
     pub fn new_outward(p: V3, t: f32, outward_normal: V3, ray_dir: V3) -> HitRecord {
         let front_face = ray_dir.dot(outward_normal) < 0.0;
-        let normal = if front_face {outward_normal} else {outward_normal * -1.0};
-        HitRecord {p, normal, t, front_face}
+        let normal = if front_face {
+            outward_normal
+        } else {
+            outward_normal * -1.0
+        };
+        HitRecord {
+            p,
+            normal,
+            t,
+            front_face,
+        }
     }
 }
 
@@ -241,7 +255,7 @@ pub struct Sphere {
 
 impl Sphere {
     pub fn new(center: V3, radius: f32) -> Sphere {
-        Sphere {center, radius}
+        Sphere { center, radius }
     }
     pub fn hit(self, ray: Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let origin_minus_center = ray.origin - self.center;
@@ -254,7 +268,7 @@ impl Sphere {
         if discriminant >= 0.0 {
             let sqrtd = sqrtf(discriminant);
             let mut root = (-half_b - sqrtd) / a;
-            
+
             if root < t_min || root > t_max {
                 root = (-half_b + sqrtd) / a;
             }
@@ -267,7 +281,6 @@ impl Sphere {
                 let normal = (p - self.center) * (1.0 / self.radius);
                 Some(HitRecord::new_outward(p, t, normal, ray.dir))
             }
-
         } else {
             None
         }

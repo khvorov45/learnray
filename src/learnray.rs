@@ -1,7 +1,7 @@
 use crate::math::Color;
 use crate::math::Ray;
-use crate::math::Sphere;
 use crate::math::Rect2i;
+use crate::math::Sphere;
 use crate::math::V2i;
 use crate::math::V3;
 use crate::mem;
