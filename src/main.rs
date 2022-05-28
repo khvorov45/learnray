@@ -2,7 +2,8 @@
 #![no_main]
 #![windows_subsystem = "windows"]
 
-use core::fmt::Write;
+#[macro_use]
+mod log;
 
 mod learnray;
 mod math;
@@ -31,44 +32,10 @@ use mem_windows as platform_mem;
 // SECTION Panic handling
 //
 
-struct DebugOutput {
-    buf: [u8; 1024],
-    used: usize,
-}
-
-impl Default for DebugOutput {
-    fn default() -> Self {
-        Self {
-            buf: [0; 1024],
-            used: 0,
-        }
-    }
-}
-
-impl Write for DebugOutput {
-    fn write_str(&mut self, msg: &str) -> Result<(), core::fmt::Error> {
-        let mut result = Ok(());
-        for byte in msg.bytes() {
-            // NOTE(khvorov) Null terminator
-            if self.used < self.buf.len() - 1 {
-                self.buf[self.used] = byte;
-                self.used += 1;
-            } else {
-                result = Err(core::fmt::Error::default());
-                break;
-            }
-        }
-        result
-    }
-}
-
 #[panic_handler]
 fn handle_panic(info: &core::panic::PanicInfo) -> ! {
     unsafe {
-        let mut output = DebugOutput::default();
-        if write!(&mut output, "{}", info).is_ok() {
-            windows_bindings::OutputDebugStringA(&output.buf[0]);
-        }
+        log_debug!("{}", info);
         windows_bindings::DebugBreak();
         windows_bindings::ExitProcess(1);
     }
