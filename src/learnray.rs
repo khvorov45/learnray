@@ -19,7 +19,14 @@ pub fn main() {
 
     let clear_color = Color::new(0.1, 0.1, 0.1, 1.0);
 
-    let _spheres = virtual_arena.make::<Sphere>(10);
+    let spheres = if let Ok(ptr) = virtual_arena.make::<Sphere>(2) {
+        unsafe { &mut *ptr }
+    } else {
+        panic!("did not allocate spheres");
+    };
+
+    spheres[0] = Sphere::new(V3::new(0.0, 0.0, -1.0), 0.5);
+    spheres[1] = Sphere::new(V3::new(0.0, -100.5, -1.0), 100.0);
 
     while window.is_running {
         window.poll_for_input();
@@ -53,7 +60,7 @@ pub fn main() {
                     dir: ray_dir,
                 };
 
-                let ray_color = get_ray_color(ray);
+                let ray_color = get_ray_color(ray, spheres);
                 let ray_color32 = ray_color.to_u32argb();
                 let px_index = ((renderer.dim.y - 1 - row) * renderer.dim.x + col) as usize;
                 renderer.pixels()[px_index] = ray_color32;
@@ -69,16 +76,22 @@ pub fn main() {
     }
 }
 
-fn get_ray_color(ray: Ray) -> Color {
-    let sphere = Sphere::new(V3::new(0.0, 0.0, -1.0), 0.5);
-    match sphere.hit(ray, 0.0, 100.0) {
-        Some(rec) => Color::from_v3(0.5 * (rec.normal + 1.0)),
-        None => {
-            let dir_norm = ray.dir.normalize();
-            let from_bottom = 0.5 * (dir_norm.y + 1.0);
-            let bottom_color = Color::new(1.0, 1.0, 1.0, 1.0);
-            let top_color = Color::new(0.5, 0.7, 1.0, 1.0);
-            (1.0 - from_bottom) * bottom_color + from_bottom * top_color
+fn get_ray_color(ray: Ray, spheres: &[Sphere]) -> Color {
+    let mut hit_color: Option<Color> = None;
+    for sphere in spheres {
+        if let Some(rec) = sphere.hit(ray, 0.0, 100.0) {
+            hit_color = Some(Color::from_v3(0.5 * (rec.normal + 1.0)));
+            break
         }
+    }
+
+    if let Some(hit_color) = hit_color {
+        hit_color
+    } else {
+        let dir_norm = ray.dir.normalize();
+        let from_bottom = 0.5 * (dir_norm.y + 1.0);
+        let bottom_color = Color::new(1.0, 1.0, 1.0, 1.0);
+        let top_color = Color::new(0.5, 0.7, 1.0, 1.0);
+        (1.0 - from_bottom) * bottom_color + from_bottom * top_color
     }
 }
