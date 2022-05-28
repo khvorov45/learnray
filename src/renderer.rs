@@ -37,6 +37,7 @@ impl Renderer {
         }
     }
 
+    #[inline]
     pub fn pixels(&mut self) -> &mut [u32] {
         unsafe { &mut *self.pixels }
     }

@@ -419,3 +419,68 @@ pub fn sqrtf(x: f32) -> f32 {
         f32::from_bits(ix as u32)
     }
 }
+
+//
+// SECTION https://github.com/rust-random/rand
+//
+
+const MULTIPLIER: u64 = 6364136223846793005;
+
+pub struct Lcg64Xsh32 {
+    state: u64,
+    increment: u64,
+}
+
+impl Default for Lcg64Xsh32 {
+    fn default() -> Self {
+        Self::new(0xcafef00dd15ea5e5, 0xa02bdbf7bb3c0a7)
+    }
+}
+
+impl Lcg64Xsh32 {
+    pub fn new(state: u64, stream: u64) -> Self {
+        // The increment must be odd, hence we discard one bit:
+        let increment = (stream << 1) | 1;
+        Lcg64Xsh32::from_state_incr(state, increment)
+    }
+
+    fn from_state_incr(state: u64, increment: u64) -> Self {
+        let mut pcg = Lcg64Xsh32 { state, increment };
+        // Move away from initial value:
+        pcg.state = pcg.state.wrapping_add(pcg.increment);
+        pcg.step();
+        pcg
+    }
+
+    fn step(&mut self) {
+        // prepare the LCG for the next round
+        self.state = self
+            .state
+            .wrapping_mul(MULTIPLIER)
+            .wrapping_add(self.increment);
+    }
+
+    pub fn u32(&mut self) -> u32 {
+        let state = self.state;
+        self.step();
+
+        // Output function XSH RR: xorshift high (bits), followed by a random rotate
+        // Constants are for 64-bit state, 32-bit output
+        const ROTATE: u32 = 59; // 64 - 5
+        const XSHIFT: u32 = 18; // (5 + 32) / 2
+        const SPARE: u32 = 27; // 64 - 32 - 5
+
+        let rot = (state >> ROTATE) as u32;
+        let xsh = (((state >> XSHIFT) ^ state) >> SPARE) as u32;
+        xsh.rotate_right(rot)
+    }
+
+    pub fn f32_01(&mut self) -> f32 {
+        let sign_and_exp_bits = 1 + 8;
+        let mantissa_bits = 23;
+        let mantissa = self.u32() << sign_and_exp_bits >> sign_and_exp_bits;
+        let mantissa_f32 = mantissa as f32;
+        let max_mantissa_f32 = (1 << (mantissa_bits)) as f32;
+        mantissa_f32 / max_mantissa_f32
+    }
+}

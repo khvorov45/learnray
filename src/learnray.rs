@@ -1,3 +1,4 @@
+use crate::math;
 use crate::math::Color;
 use crate::math::Ray;
 use crate::math::Rect2i;
@@ -27,6 +28,8 @@ pub fn main() {
 
     spheres[0] = Sphere::new(V3::new(0.0, 0.0, -1.0), 0.5);
     spheres[1] = Sphere::new(V3::new(0.0, -100.5, -1.0), 100.0);
+
+    let mut rng = math::Lcg64Xsh32::default();
 
     while window.is_running {
         window.poll_for_input();
@@ -59,6 +62,8 @@ pub fn main() {
                     origin: camera_p,
                     dir: ray_dir,
                 };
+
+                let _rand = rng.f32_01();
 
                 let ray_color = get_ray_color(ray, spheres);
                 let ray_color32 = ray_color.to_u32argb();
