@@ -115,7 +115,7 @@ pub fn poll_for_input(_window: &mut Window) {
     }
 }
 
-pub fn display_pixels(window: &mut Window, pixels: &[u32], px_width: i32, px_height: i32) {
+pub fn display_pixels(window: &mut Window, pixels: *const [u32], px_width: i32, px_height: i32) {
     window.platform.bmi.bmiHeader.biWidth = px_width;
     window.platform.bmi.bmiHeader.biHeight = -px_height; // NOTE(khvorov) Negative = top-down
     unsafe {
@@ -129,7 +129,7 @@ pub fn display_pixels(window: &mut Window, pixels: &[u32], px_width: i32, px_hei
             0,
             px_width,
             px_height,
-            pixels.as_ptr() as *const core::ffi::c_void,
+            pixels as *const core::ffi::c_void,
             &window.platform.bmi,
             win::DIB_RGB_COLORS,
             win::SRCCOPY,

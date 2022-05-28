@@ -19,7 +19,7 @@ pub fn main() {
 
     let clear_color = Color::new(0.1, 0.1, 0.1, 1.0);
 
-    // let spheres = virtual_arena.make::<Sphere>(10);
+    let _spheres = virtual_arena.make::<Sphere>(10);
 
     while window.is_running {
         window.poll_for_input();
@@ -56,7 +56,7 @@ pub fn main() {
                 let ray_color = get_ray_color(ray);
                 let ray_color32 = ray_color.to_u32argb();
                 let px_index = ((renderer.dim.y - 1 - row) * renderer.dim.x + col) as usize;
-                renderer.pixels[px_index] = ray_color32;
+                renderer.pixels()[px_index] = ray_color32;
             }
         }
 

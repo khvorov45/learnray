@@ -25,7 +25,7 @@ pub enum Error {
 
 pub trait Allocator {
     fn alloc(self: &mut Self, size: usize, align: usize) -> Result<*const u8, Error>;
-    fn make<T>(self: &mut Self, len: usize) -> Result<&mut [T], Error>;
+    fn make<T>(self: &mut Self, len: usize) -> Result<*mut [T], Error>;
 }
 
 pub struct VirtualArena {
@@ -76,11 +76,11 @@ impl Allocator for VirtualArena {
         }
     }
 
-    fn make<T>(self: &mut Self, len: usize) -> Result<&mut [T], Error> {
+    fn make<T>(self: &mut Self, len: usize) -> Result<*mut [T], Error> {
         match self.alloc(core::mem::size_of::<T>() * len, core::mem::align_of::<T>()) {
             Ok(ptr) => {
                 let slice = core::ptr::slice_from_raw_parts_mut(ptr as *mut T, len);
-                Ok(unsafe { &mut *slice })
+                Ok(slice as *mut [T])
             }
             Err(err) => Err(err),
         }
