@@ -1,8 +1,8 @@
 use core::cmp::min;
 
 use crate::math::Color;
-use crate::math::V2i;
 use crate::math::Rect2i;
+use crate::math::V2i;
 use crate::mem::Allocator;
 
 #[derive(Default)]
