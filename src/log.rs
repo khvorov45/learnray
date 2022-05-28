@@ -37,7 +37,7 @@ macro_rules! log_debug {
         if write!(&mut output, $($arg)+).is_ok() {
             #[allow(unused_unsafe)]
             #[cfg(target_os = "windows")]
-            unsafe { crate::windows_bindings::OutputDebugStringA(&output.buf[0]) };
+            unsafe { crate::platform_log::output_debug_string(&output.buf) };
         }
     })
 }

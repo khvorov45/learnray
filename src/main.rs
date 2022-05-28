@@ -19,6 +19,11 @@ mod windows_bindings;
 mod utf16;
 
 #[cfg(target_os = "windows")]
+mod log_windows;
+#[cfg(target_os = "windows")]
+use log_windows as platform_log;
+
+#[cfg(target_os = "windows")]
 mod window_windows;
 #[cfg(target_os = "windows")]
 use window_windows as platform_window;
