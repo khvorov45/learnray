@@ -9,7 +9,7 @@ pub struct PlatformWindow {
 }
 
 impl Window {
-    pub fn init(&mut self, width: i32, height: i32) {
+    pub fn init(&mut self, dim: V2i) {
         let mut window_class = win::WNDCLASSEXW {
             cbSize: core::mem::size_of::<win::WNDCLASSEXW>() as u32,
             style: win::CS_VREDRAW | win::CS_HREDRAW,
@@ -24,8 +24,6 @@ impl Window {
             lpszClassName: &utf16_null!("learnrayClassName")[0],
             hIconSm: 0,
         };
-
-        let dim = V2i::new(width, height);
 
         let hdc = unsafe {
             win::GetModuleHandleExW(0, core::ptr::null(), &mut window_class.hInstance);

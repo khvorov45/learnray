@@ -8,15 +8,43 @@ use crate::math::V3;
 use crate::mem;
 use crate::mem::FixedArray;
 
+struct Camera {
+    pub eye: V3,
+    pub viewport_lower_left: V3,
+    pub viewport_h: V3,
+    pub viewport_v: V3,
+}
+
+impl Camera {
+    pub fn new(width_over_height: f32) -> Camera {
+        let eye = V3::new(0.0, 0.0, 0.0);
+        let camera_to_viewport: f32 = 1.0;
+
+        let viewport_height: f32 = 2.0;
+        let viewport_width: f32 = width_over_height * viewport_height;
+
+        let viewport_h = V3::new(viewport_width, 0.0, 0.0);
+        let viewport_v = V3::new(0.0, viewport_height, 0.0);
+
+        let viewport_lower_left =
+            eye - viewport_h * 0.5 - viewport_v * 0.5 + V3::new(0.0, 0.0, -camera_to_viewport);
+
+        Camera {
+            eye,
+            viewport_lower_left,
+            viewport_h,
+            viewport_v,
+        }
+    }
+}
+
 pub fn main() {
-    let mut virtual_arena = mem::VirtualArena::default();
-    virtual_arena.init(1 * mem::GIGABYTE, 1 * mem::MEGABYTE);
+    let mut virtual_arena = mem::VirtualArena::new(1 * mem::GIGABYTE, 1 * mem::MEGABYTE);
 
     let mut window = crate::window::Window::default();
-    window.init(1280, 720);
+    window.init(V2i::new(1280, 720));
 
-    let mut renderer = crate::renderer::Renderer::default();
-    renderer.init(7680, 4320, &mut virtual_arena);
+    let mut renderer = crate::renderer::Renderer::new(window.dim, &mut virtual_arena);
 
     let clear_color = Color::new(0.1, 0.1, 0.1, 1.0);
 
@@ -31,25 +59,24 @@ pub fn main() {
 
     let mut rng = math::Lcg64Xsh32::default();
 
+    let camera = Camera::new(window.dim.x as f32 / window.dim.y as f32);
+
     while window.is_running {
+        //
+        // SECTION Input
+        //
+
         window.poll_for_input();
 
-        renderer.clear_buffers(window.dim.x, window.dim.y, clear_color);
+        //
+        // SECTION Update
+        //
 
-        let width_over_height = renderer.dim.x as f32 / renderer.dim.y as f32;
+        //
+        // SECTION Render
+        //
 
-        let camera_p = V3::new(0.0, 0.0, 0.0);
-        let camera_to_viewport: f32 = 1.0;
-
-        let viewport_height: f32 = 2.0;
-        let viewport_width: f32 = width_over_height * viewport_height;
-
-        let viewport_horizontal = V3::new(viewport_width, 0.0, 0.0);
-        let viewport_vertical = V3::new(0.0, viewport_height, 0.0);
-
-        let viewport_lower_left_corner =
-            camera_p - viewport_horizontal * 0.5 - viewport_vertical * 0.5
-                + V3::new(0.0, 0.0, -camera_to_viewport);
+        renderer.clear_buffers(clear_color);
 
         for row in 0..renderer.dim.y {
             for col in 0..renderer.dim.x {
@@ -57,9 +84,9 @@ pub fn main() {
                 let v = row as f32 / (renderer.dim.y - 1) as f32;
 
                 let ray_dir =
-                    viewport_lower_left_corner + u * viewport_horizontal + v * viewport_vertical;
+                    camera.viewport_lower_left + u * camera.viewport_h + v * camera.viewport_v;
                 let ray = Ray {
-                    origin: camera_p,
+                    origin: camera.eye,
                     dir: ray_dir,
                 };
 
@@ -86,7 +113,7 @@ fn get_ray_color(ray: Ray, spheres: &[Sphere]) -> Color {
     for sphere in spheres {
         if let Some(rec) = sphere.hit(ray, 0.0, 100.0) {
             hit_color = Some(Color::from_v3(0.5 * (rec.normal + 1.0)));
-            break
+            break;
         }
     }
 

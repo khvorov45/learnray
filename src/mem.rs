@@ -1,5 +1,5 @@
-use core::mem::size_of;
 use core::mem::align_of;
+use core::mem::size_of;
 
 pub const BYTE: usize = 1;
 pub const KILOBYTE: usize = 1024 * BYTE;
@@ -57,15 +57,21 @@ impl<T> core::ops::Deref for FixedArray<T> {
 
 impl<T> Default for FixedArray<T> {
     fn default() -> FixedArray<T> {
-        FixedArray {ptr: 0 as *mut T, len: 0}
+        FixedArray {
+            ptr: 0 as *mut T,
+            len: 0,
+        }
     }
 }
 
 impl<T> FixedArray<T> {
     pub fn new<A: Allocator>(len: usize, allocator: &mut A) -> Result<FixedArray<T>, Error> {
         match allocator.alloc(len * size_of::<T>(), align_of::<T>()) {
-            Ok(ptr) => Ok(FixedArray{ptr: ptr as *mut T, len: len}),
-            Err(err) => Err(err)
+            Ok(ptr) => Ok(FixedArray {
+                ptr: ptr as *mut T,
+                len: len,
+            }),
+            Err(err) => Err(err),
         }
     }
 }
@@ -89,12 +95,12 @@ impl Default for VirtualArena {
 }
 
 impl VirtualArena {
-    pub fn init(self: &mut VirtualArena, reserve: usize, commit: usize) {
+    pub fn new(reserve: usize, commit: usize) -> VirtualArena {
         assert!(commit <= reserve);
-        self.reserved = reserve;
-        self.used = 0;
-        (self.base, self.reserved) = crate::platform_mem::reserve(reserve);
-        self.committed = crate::platform_mem::commit(self.base, commit);
+        let (base, reserved) = crate::platform_mem::reserve(reserve);
+        let committed = crate::platform_mem::commit(base, commit);
+        let used = 0;
+        VirtualArena{base, reserved, committed, used}
     }
 }
 
