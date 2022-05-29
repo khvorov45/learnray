@@ -216,6 +216,9 @@ pub struct Ray {
 }
 
 impl Ray {
+    pub fn new(origin: V3, dir: V3) -> Ray {
+        Ray {origin, dir}
+    }
     pub fn at(&self, t: f32) -> V3 {
         self.origin + t * self.dir
     }

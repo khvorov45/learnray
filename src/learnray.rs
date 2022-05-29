@@ -36,6 +36,12 @@ impl Camera {
             viewport_v,
         }
     }
+
+    pub fn ray(&self, u: f32, v: f32) -> Ray {
+        let dir =
+            self.viewport_lower_left + u * self.viewport_h + v * self.viewport_v;
+        Ray::new(self.eye, dir)
+    }
 }
 
 pub fn main() {
@@ -80,19 +86,18 @@ pub fn main() {
 
         for row in 0..renderer.dim.y {
             for col in 0..renderer.dim.x {
-                let u = col as f32 / (renderer.dim.x - 1) as f32;
-                let v = row as f32 / (renderer.dim.y - 1) as f32;
 
-                let ray_dir =
-                    camera.viewport_lower_left + u * camera.viewport_h + v * camera.viewport_v;
-                let ray = Ray {
-                    origin: camera.eye,
-                    dir: ray_dir,
-                };
+                let samples_per_pixel = 10;
 
-                let _rand = rng.f32_01();
+                let mut ray_color = Color::default();
+                for _ in 0..samples_per_pixel {
+                    let u = (col as f32 + rng.f32_01()) / (renderer.dim.x - 1) as f32;
+                    let v = (row as f32 + rng.f32_01()) / (renderer.dim.y - 1) as f32;
+                    let ray = camera.ray(u, v);
+                    ray_color = ray_color + get_ray_color(ray, &spheres);
+                }
+                ray_color = ray_color * (1.0 / samples_per_pixel as f32);
 
-                let ray_color = get_ray_color(ray, &spheres);
                 let ray_color32 = ray_color.to_u32argb();
                 let px_index = ((renderer.dim.y - 1 - row) * renderer.dim.x + col) as usize;
                 renderer.pixels[px_index] = ray_color32;
