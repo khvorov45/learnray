@@ -6,7 +6,7 @@ use crate::math::Sphere;
 use crate::math::V2i;
 use crate::math::V3;
 use crate::mem;
-use crate::mem::Allocator;
+use crate::mem::FixedArray;
 
 pub fn main() {
     let mut virtual_arena = mem::VirtualArena::default();
@@ -20,8 +20,8 @@ pub fn main() {
 
     let clear_color = Color::new(0.1, 0.1, 0.1, 1.0);
 
-    let spheres = if let Ok(ptr) = virtual_arena.make::<Sphere>(2) {
-        unsafe { &mut *ptr }
+    let mut spheres = if let Ok(spheres) = FixedArray::new(2, &mut virtual_arena) {
+        spheres
     } else {
         panic!("did not allocate spheres");
     };
@@ -65,10 +65,10 @@ pub fn main() {
 
                 let _rand = rng.f32_01();
 
-                let ray_color = get_ray_color(ray, spheres);
+                let ray_color = get_ray_color(ray, &spheres);
                 let ray_color32 = ray_color.to_u32argb();
                 let px_index = ((renderer.dim.y - 1 - row) * renderer.dim.x + col) as usize;
-                renderer.pixels()[px_index] = ray_color32;
+                renderer.pixels[px_index] = ray_color32;
             }
         }
 
@@ -77,7 +77,7 @@ pub fn main() {
             Color::new(0.0, 0.0, 1.0, 1.0),
         );
 
-        window.display_pixels(renderer.pixels, renderer.dim.x, renderer.dim.y);
+        window.display_pixels(&renderer.pixels, renderer.dim.x, renderer.dim.y);
     }
 }
 

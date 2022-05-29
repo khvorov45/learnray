@@ -1,3 +1,6 @@
+use core::mem::size_of;
+use core::mem::align_of;
+
 pub const BYTE: usize = 1;
 pub const KILOBYTE: usize = 1024 * BYTE;
 pub const MEGABYTE: usize = 1024 * KILOBYTE;
@@ -25,7 +28,46 @@ pub enum Error {
 
 pub trait Allocator {
     fn alloc(self: &mut Self, size: usize, align: usize) -> Result<*const u8, Error>;
-    fn make<T>(self: &mut Self, len: usize) -> Result<*mut [T], Error>;
+}
+
+pub struct FixedArray<T> {
+    pub ptr: *mut T,
+    pub len: usize,
+}
+
+impl<T> core::ops::Index<usize> for FixedArray<T> {
+    type Output = T;
+    fn index(&self, index: usize) -> &T {
+        unsafe { &*((self.ptr as usize + index * size_of::<T>()) as *const T) }
+    }
+}
+
+impl<T> core::ops::IndexMut<usize> for FixedArray<T> {
+    fn index_mut(&mut self, index: usize) -> &mut T {
+        unsafe { &mut *((self.ptr as usize + index * size_of::<T>()) as *mut T) }
+    }
+}
+
+impl<T> core::ops::Deref for FixedArray<T> {
+    type Target = [T];
+    fn deref(&self) -> &[T] {
+        unsafe { core::slice::from_raw_parts(self.ptr, self.len) }
+    }
+}
+
+impl<T> Default for FixedArray<T> {
+    fn default() -> FixedArray<T> {
+        FixedArray {ptr: 0 as *mut T, len: 0}
+    }
+}
+
+impl<T> FixedArray<T> {
+    pub fn new<A: Allocator>(len: usize, allocator: &mut A) -> Result<FixedArray<T>, Error> {
+        match allocator.alloc(len * size_of::<T>(), align_of::<T>()) {
+            Ok(ptr) => Ok(FixedArray{ptr: ptr as *mut T, len: len}),
+            Err(err) => Err(err)
+        }
+    }
 }
 
 pub struct VirtualArena {
@@ -73,16 +115,6 @@ impl Allocator for VirtualArena {
             Ok(base_aligned)
         } else {
             Err(Error::OutOfMemory)
-        }
-    }
-
-    fn make<T>(self: &mut Self, len: usize) -> Result<*mut [T], Error> {
-        match self.alloc(core::mem::size_of::<T>() * len, core::mem::align_of::<T>()) {
-            Ok(ptr) => {
-                let slice = core::ptr::slice_from_raw_parts_mut(ptr as *mut T, len);
-                Ok(slice as *mut [T])
-            }
-            Err(err) => Err(err),
         }
     }
 }

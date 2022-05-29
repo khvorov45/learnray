@@ -85,7 +85,7 @@ impl Window {
         }
     }
 
-    pub fn display_pixels(&mut self, pixels: *const [u32], px_width: i32, px_height: i32) {
+    pub fn display_pixels(&mut self, pixels: &[u32], px_width: i32, px_height: i32) {
         self.platform.bmi.bmiHeader.biWidth = px_width;
         self.platform.bmi.bmiHeader.biHeight = -px_height; // NOTE(khvorov) Negative = top-down
         unsafe {
@@ -99,7 +99,7 @@ impl Window {
                 0,
                 px_width,
                 px_height,
-                pixels as *const core::ffi::c_void,
+                pixels.as_ptr() as *const core::ffi::c_void,
                 &self.platform.bmi,
                 win::DIB_RGB_COLORS,
                 win::SRCCOPY,
